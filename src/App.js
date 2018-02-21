@@ -190,13 +190,10 @@ class Button extends Component {
 }
 
 
-
-
 class App extends Component {
 
     constructor(props) {
         super(props)
-        this.song = undefined;
         this.playStartCurrentTime;
         this.recordStartCurrentTime;
         this.recordEndCurrentTime;
