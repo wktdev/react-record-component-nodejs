@@ -6,7 +6,7 @@ import sound from "./audio/song.mp3";
 import './App.css';
 
 
-let audioContext,
+let p5audioContext,
     song,
     mic,
     recorder,
@@ -35,11 +35,11 @@ var p5temp = function(sketch) {
 
 
     sketch.preload = function() { // @preload is required by P5.js
-        audioContext = sketch.getAudioContext();
+        p5audioContext = sketch.getAudioContext();
         sketch.soundFormats('mp3', 'ogg');
         song = sketch.loadSound(sound);
         console.log(song);
-        console.log(audioContext.currentTime);
+        console.log(p5audioContext.currentTime);
     }
 };
 
@@ -241,7 +241,7 @@ class App extends Component {
                 playButtonText: "Stop Song",
             });
 
-            this.playStartCurrentTime = audioContext.currentTime;
+            this.playStartCurrentTime = p5audioContext.currentTime;
             console.log(this.playStartCurrentTime);
             this.cueSelectedRecordingsToPlay();
             song.play()
@@ -309,7 +309,9 @@ class App extends Component {
                 recordButtonText: "Stop Recording",
             });
 
-            this.cueSelectedRecordingsToPlay();
+        
+            
+
 
             // audioRecorder.record();
             mic = new p5.AudioIn();
@@ -317,7 +319,7 @@ class App extends Component {
             recorder = new p5.SoundRecorder();
             recorder.setInput(mic);
             soundFile = new p5.SoundFile();
-            this.recordStartCurrentTime = audioContext.currentTime
+            this.recordStartCurrentTime = p5audioContext.currentTime
             recorder.record(soundFile);
 
 
@@ -361,7 +363,8 @@ class App extends Component {
             });
 
 
-            this.playStartCurrentTime = audioContext.currentTime;
+            this.playStartCurrentTime = p5audioContext.currentTime;
+            this.cueSelectedRecordingsToPlay();
             console.log(this.playStartCurrentTime);
             song.play();
         }
