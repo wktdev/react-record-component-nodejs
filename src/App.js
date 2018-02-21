@@ -162,8 +162,6 @@ class TimeDisplay extends Component {
 
 
 
-
-
 class Button extends Component {
     constructor(props) {
         super(props)
@@ -205,7 +203,7 @@ class App extends Component {
 
         this.toggleSongPlaying = this.toggleSongPlaying.bind(this);
         this.toggleRecording = this.toggleRecording.bind(this);
-        this.checkedToPlay = this.checkedToPlay.bind(this);
+        this.toggleCheckedToPlay = this.toggleCheckedToPlay.bind(this);
         this.cueSelectedRecordingsToPlay = this.cueSelectedRecordingsToPlay.bind(this);
 
 
@@ -229,6 +227,96 @@ class App extends Component {
         })
     }
 
+    play() {
+        this.setState({
+            isPlaying: true,
+            playButtonText: "Stop Song",
+        });
+
+        this.playStartCurrentTime = p5audioContext.currentTime;
+        console.log(this.playStartCurrentTime);
+        this.cueSelectedRecordingsToPlay();
+        song.play()
+    }
+
+    stopPlaying() {
+
+        this.setState({
+            isPlaying: false,
+            playButtonText: "Play Song"
+        });
+
+        song.stop();
+
+        this.stopRecording()
+
+        stopAllSoundFiles(this.state.audioRecordings, 'sound');
+
+    }
+
+    record() {
+        this.setState({
+            isRecording: true,
+
+            recordButtonText: "Stop Recording",
+        });
+
+        // audioRecorder.record();
+        mic = new p5.AudioIn();
+        mic.start();
+        recorder = new p5.SoundRecorder();
+        recorder.setInput(mic);
+        soundFile = new p5.SoundFile();
+        this.recordStartCurrentTime = p5audioContext.currentTime
+        recorder.record(soundFile);
+    }
+
+    stopRecording() {
+        if (this.state.isRecording) {
+            this.setState({
+                isRecording: false,
+                recordButtonText: "Start Recording"
+            });
+
+            recorder.stop();
+
+            //_____________________________BEGIN update state
+            let timeStamp = Math.abs(this.recordStartCurrentTime - this.playStartCurrentTime);
+
+            let tempAudioRecordings = this.state.audioRecordings;
+            tempAudioRecordings.push({ timestamp: timeStamp, sound: soundFile, checkedToPlay: false });
+            this.setState({
+                audioRecordings: tempAudioRecordings
+            });
+
+
+            //___________________________END update state
+
+
+        }
+
+    }
+
+
+
+    toggleCheckedToPlay(index) {
+
+        let arrayTemp = this.state.audioRecordings;
+
+        if (!arrayTemp[index].checkedToPlay) {
+            arrayTemp[index].checkedToPlay = true;
+        } else {
+            arrayTemp[index].checkedToPlay = false;
+        }
+
+        this.setState({
+            audioRecordings: arrayTemp
+        })
+
+    }
+
+
+
 
 
     toggleSongPlaying() {
@@ -236,62 +324,11 @@ class App extends Component {
 
         if (!isPlaying) {
 
-            this.setState({
-                isPlaying: true,
-                playButtonText: "Stop Song",
-            });
-
-            this.playStartCurrentTime = p5audioContext.currentTime;
-            console.log(this.playStartCurrentTime);
-            this.cueSelectedRecordingsToPlay();
-            song.play()
+            this.play();
 
         } else {
 
-            this.setState({
-                isPlaying: false,
-                playButtonText: "Play Song"
-            })
-
-            //___________________________BEGIN if recording when playing stops... then stop recording too
-
-            if (this.state.isRecording) {
-                this.setState({
-                    isRecording: false,
-                    recordButtonText: "Start Recording"
-                });
-
-                recorder.stop();
-
-
-
-
-
-
-                //_____________________________BEGIN update state
-                let timeStamp = Math.abs(this.recordStartCurrentTime - this.playStartCurrentTime);
-
-                let tempAudioRecordings = this.state.audioRecordings;
-                tempAudioRecordings.push({ timestamp: timeStamp, sound: soundFile, checkedToPlay: false });
-                this.setState({
-                    audioRecordings: tempAudioRecordings
-                });
-
-
-                //___________________________END update state
-
-
-
-            //___________________________END if recording when playing stops... then stop recording too
-
-
-            }
-
-            stopAllSoundFiles(this.state.audioRecordings, 'sound');
-
-
-
-            song.stop();
+            this.stopPlaying();
 
         }
 
@@ -303,53 +340,12 @@ class App extends Component {
         var isRecording = this.state.isRecording;
         if (!isRecording) {
 
-            this.setState({
-                isRecording: true,
-
-                recordButtonText: "Stop Recording",
-            });
-
-        
-            
-
-
-            // audioRecorder.record();
-            mic = new p5.AudioIn();
-            mic.start();
-            recorder = new p5.SoundRecorder();
-            recorder.setInput(mic);
-            soundFile = new p5.SoundFile();
-            this.recordStartCurrentTime = p5audioContext.currentTime
-            recorder.record(soundFile);
-
-
+            this.record();
 
         } else {
 
-            this.setState({
-                isRecording: false,
-                recordButtonText: "Start Recording"
-            });
+            this.stopRecording();
 
-            recorder.stop();
-
-            console.log();
-            let timeStamp = Math.abs(this.recordStartCurrentTime - this.playStartCurrentTime);
-
-
-            //_____________________________BEGIN update state
-
-            let tempAudioRecordings = this.state.audioRecordings;
-            tempAudioRecordings.push({ timestamp: timeStamp, sound: soundFile, checkedToPlay: false });
-            this.setState({
-                audioRecordings: tempAudioRecordings
-            });
-
-
-            //_____________________________END update state
-
-
-            // save(soundFile, 'mySound.wav');
         }
 
 
@@ -357,34 +353,12 @@ class App extends Component {
 
         if (!isPlaying) {
 
-            this.setState({
-                isPlaying: true,
-                playButtonText: "Stop Song",
-            });
-
-
-            this.playStartCurrentTime = p5audioContext.currentTime;
-            this.cueSelectedRecordingsToPlay();
-            console.log(this.playStartCurrentTime);
-            song.play();
+            this.play()
         }
     }
 
-    checkedToPlay(index) {
-        let arrayTemp = this.state.audioRecordings;
-        if (!arrayTemp[index].checkedToPlay) {
-            arrayTemp[index].checkedToPlay = true;
-        } else {
-            arrayTemp[index].checkedToPlay = false;
-        }
 
-        this.setState({
-            audioRecordings: arrayTemp
-        })
 
-        console.log(this.state.audioRecordings[index].checkedToPlay);
-
-    }
 
 
 
@@ -399,7 +373,7 @@ class App extends Component {
         }
 
         let listRecordings = this.state.audioRecordings.map((val, index) => {
-            return <li key={index}>recording number: {index+1} timestamp: {val.timestamp} | PLAY <input type='checkbox' onChange={()=>this.checkedToPlay(index)}></input></li>
+            return <li key={index}>recording number: {index+1} timestamp: {val.timestamp} | PLAY <input type='checkbox' onChange={()=>this.toggleCheckedToPlay(index)}></input></li>
         })
 
         return (
